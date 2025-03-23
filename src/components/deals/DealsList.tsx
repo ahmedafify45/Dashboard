@@ -1,5 +1,11 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import { db } from "@/config/firebaseConfig";
 import { FaPen } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
@@ -76,6 +82,21 @@ function DealList() {
       setEditedDeal(null);
     } catch (error) {
       console.error("Error updating deal:", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!editingDeal) return;
+
+    try {
+      const dealRef = doc(db, "deals", editingDeal.id);
+      await deleteDoc(dealRef);
+
+      setDeals((prev) => prev.filter((deal) => deal.id !== editingDeal.id));
+      setEditingDeal(null);
+      setEditedDeal(null);
+    } catch (error) {
+      console.error("Error deleting deal:", error);
     }
   };
 
@@ -234,8 +255,8 @@ function DealList() {
             </select>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setEditingDeal(null)}>
-              Cancel
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
             </Button>
             <Button onClick={handleSave}>Save</Button>
           </DialogFooter>
